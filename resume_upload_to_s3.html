@@ -1,0 +1,81 @@
+
+
+<html>
+
+    <script src="https://sdk.amazonaws.com/js/aws-sdk-2.283.1.min.js"></script>
+    
+    <body>
+        <!-- <input class="btn btn-primary" id="photo" type="file" accept="image/*"> -->
+        <input class="btn btn-primary" id="photo" type="file" >
+        <button id="addphoto" onclick="uploadImage()">
+            Add Photo
+        </button>
+    </body>
+    <script type="text/javascript">
+        var albumBucketName = 'your-bucket-name';   
+    //    var bucketRegion = 'eu-central-1';
+    //    var IdentityPoolId = 'eu-central-1:4c68bc04-ab12-428d-bdb1-7870a845d1ac';
+    
+    // Initialize the Amazon Cognito credentials provider
+    // AWS.config.region = 'eu-central-1'; // Region
+    // AWS.config.credentials = new AWS.CognitoIdentityCredentials({
+    //     IdentityPoolId: 'eu-central-1:dc5860a8-04d9-4299-9456-57a5a2e18dab',
+    // });
+
+    AWS.config.region = 'region-of-cognito-id-pool'; // Region
+AWS.config.credentials = new AWS.CognitoIdentityCredentials({
+    IdentityPoolId: 'yout-pool-id',
+});
+        var s3 = new AWS.S3({
+            apiVersion: '2006-03-01',
+            params: {
+                Bucket: albumBucketName
+            }
+        });
+    
+        function uploadImage() {
+    
+            var files = document.getElementById('photo').files;
+            console.log(files[0].name);
+    
+    
+            if (!files.length) {
+                return alert('Please choose a File to upload.');
+            }
+            // var check = files[0].type.search("image");
+            // console.log(check)
+            // if (check != 0) {
+            //     return alert('Please choose a Image.');
+            // }
+            var file = files[0];
+            //alert(file);
+            var filetype = file.type.split('/')[1];
+            // alert(name);
+            //alert(filetype);
+            var fileName = files[0].name;
+            // console.log(fileName)
+            alert(fileName);
+    
+            var albumPhotosKey = encodeURIComponent(albumBucketName) + '/images/';
+    
+            var photoKey = albumPhotosKey + fileName;
+            alert(photoKey);
+            s3.upload({
+                Key: photoKey,
+                Body: file,
+                ACL: 'public-read'
+            }, function(err, data) {
+                alert("Called");
+                if (err) {
+                    return alert('There was an error uploading your photo: ', err.message);
+                }
+                alert('Successfully uploaded photo.');
+                //query to update image url "https://visitorappggs.s3.eu-central-1.amazonaws.com/visitorappggs/images/"+filename
+                // viewAlbum(albumBucketName);
+            });
+        }
+    
+    </script>
+    
+    </html>
+    
